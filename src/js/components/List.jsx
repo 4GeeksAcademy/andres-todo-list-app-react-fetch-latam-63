@@ -4,6 +4,7 @@ import { useEffect } from "react";
 const List = () => {
   const [tasks, setTasks] = useState([]);
   const [inputValue, setInputValue] = useState("");
+  const [user, setUser] = useState("andres");
   const [isVisible, setIsVisible] = useState(null);
   const Api_URL = "https://playground.4geeks.com/todo";
 
@@ -13,7 +14,7 @@ const List = () => {
 
   const CreateTask = (event) => {
     if (event.key === "Enter" && inputValue.trim() !== "") {
-      fetch(Api_URL + "/todos/andres", {
+      fetch(Api_URL + `/todos/${user}`, {
         method: "POST",
 
         body: JSON.stringify({
@@ -46,10 +47,10 @@ const List = () => {
   };
 
   function CreateUser() {
-    fetch(Api_URL + "/users/andres", {
+    fetch(Api_URL + `/users/${user}`, {
       method: "POST",
       body: JSON.stringify({
-        name: "andres",
+        name: user,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -90,8 +91,11 @@ const List = () => {
   }
 
   function Tasklist() {
-    fetch(Api_URL + "/users/andres")
+    fetch(Api_URL + `/users/${user}`)
       .then((resp) => {
+        if (!resp.ok) {
+          return alert("user doesnt exist, please select a valid username");
+        }
         console.log(resp.ok);
         console.log(resp.status);
         return resp.json();
@@ -127,6 +131,11 @@ const List = () => {
       return "No tasks, add a task";
     }
     return "What needs to be done?";
+  };
+
+  const ChangeUser = () => {
+    Tasklist();
+    setUser("");
   };
 
   useEffect(() => {
@@ -174,7 +183,30 @@ const List = () => {
         </li>
       </ul>
       <div className="col-2 ms-auto">
-        <button type="button" className="btn btn-danger" onClick={DeleteList}>
+        <div>
+          <input
+            type="text"
+            placeholder="Username"
+            onChange={(e) => {
+              setUser(e.target.value);
+            }}
+            value={user}
+          ></input>
+          <button
+            type="button"
+            className="btn btn-primary mt-1"
+            onClick={() => {
+              ChangeUser();
+            }}
+          >
+            Change User
+          </button>
+        </div>
+        <button
+          type="button"
+          className="btn btn-danger mt-2"
+          onClick={DeleteList}
+        >
           Delete Todo List
         </button>
       </div>
