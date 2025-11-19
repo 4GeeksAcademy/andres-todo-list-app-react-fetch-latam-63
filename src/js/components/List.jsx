@@ -12,7 +12,7 @@ const List = () => {
   }
 
   const CreateTask = (event) => {
-    if (event.key === "Enter" && inputValue !== "") {
+    if (event.key === "Enter" && inputValue.trim() !== "") {
       fetch(Api_URL + "/todos/andres", {
         method: "POST",
 
@@ -20,11 +20,14 @@ const List = () => {
           label: inputValue,
           is_done: false,
         }),
-
         headers: {
           "Content-Type": "application/json",
         },
-      }).then(() => Tasklist());
+      })
+        .then(() => Tasklist())
+        .catch((error) => {
+          console.log(error);
+        });
       setInputValue("");
     }
   };
@@ -35,32 +38,11 @@ const List = () => {
       headers: {
         "Content-Type": "application/json",
       },
-    }).then(() => Tasklist());
-  };
-
-  const Capitalize = (item) => {
-    return item.charAt(0).toUpperCase() + item.slice(1);
-  };
-
-  const TaskCounter = (array) => {
-    if (array.length === 1) {
-      return `${array.length} Item left`;
-    }
-    return `${array.length} Items left`;
-  };
-
-  function Visibility(index) {
-    if (isVisible == index) {
-      return "visible";
-    }
-    return "hidden";
-  }
-
-  const Placeholder = (array) => {
-    if (array.length === 0) {
-      return "No tasks, add a task";
-    }
-    return "What needs to be done?";
+    })
+      .then(() => Tasklist())
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   function CreateUser() {
@@ -86,30 +68,28 @@ const List = () => {
       });
   }
 
-  function DeleteUser() {
-    fetch(Api_URL + "/users/andres", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((resp) => {
-        console.log(resp.ok);
-        console.log(resp.status);
+  function DeleteList() {
+    tasks.map((task) => {
+      fetch(Api_URL + `/todos/${task.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
       })
-      .then(() => {
-        CreateUser();
-      })
-      .then(() => {
-        Tasklist();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        .then((resp) => {
+          console.log(resp.ok);
+          console.log(resp.status);
+        })
+        .then(() => {
+          Tasklist();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
   }
 
   function Tasklist() {
-    CreateUser();
     fetch(Api_URL + "/users/andres")
       .then((resp) => {
         console.log(resp.ok);
@@ -124,6 +104,30 @@ const List = () => {
         console.log(error);
       });
   }
+  const Capitalize = (item) => {
+    return item.charAt(0).toUpperCase() + item.slice(1);
+  };
+
+  const TaskCounter = (array) => {
+    if (array.length === 1) {
+      return `${array.length} Item left`;
+    }
+    return `${array.length} Items left`;
+  };
+
+  function Visibility(index) {
+    if (isVisible == index) {
+      return "visible";
+    }
+    return "hidden";
+  }
+
+  const Placeholder = (array) => {
+    if (array.length === 0) {
+      return "No tasks, add a task";
+    }
+    return "What needs to be done?";
+  };
 
   useEffect(() => {
     CreateUser();
@@ -131,8 +135,9 @@ const List = () => {
   }, []);
 
   return (
-    <form onSubmit={sendData} className="d-flex justify-content-center">
-      <ul className="todo-list list-group col-5 list-group-flush">
+    <form onSubmit={sendData} className="d-flex justify-content-between">
+      <div className="col-1 me-auto"></div>
+      <ul className="todo-list list-group col-5 list-group-flush ms-auto">
         <li className="list-group-item ps-5">
           <input
             type="text"
@@ -143,7 +148,7 @@ const List = () => {
             onKeyDown={CreateTask}
           />
         </li>
-        {tasks.map((task, index) => {
+        {tasks.map((task) => {
           return (
             <li
               className="list-group-item ps-5 list-item"
@@ -155,7 +160,7 @@ const List = () => {
               {Capitalize(task.label)}
               <i
                 className="delete-marker"
-                key={index}
+                key={task.id}
                 style={{ visibility: `${Visibility(task.id)}` }}
                 onClick={() => DeleteTask(task.id)}
               >
@@ -168,8 +173,8 @@ const List = () => {
           {TaskCounter(tasks)}
         </li>
       </ul>
-      <div className="col-2">
-        <button type="button" onClick={DeleteUser}>
+      <div className="col-2 ms-auto">
+        <button type="button" className="btn btn-danger" onClick={DeleteList}>
           Delete Todo List
         </button>
       </div>
