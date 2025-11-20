@@ -6,6 +6,8 @@ const List = () => {
   const [inputValue, setInputValue] = useState("");
   const [user, setUser] = useState("andres");
   const [isVisible, setIsVisible] = useState(null);
+  const [PlaceholderValue, setPlaceholderValue] = useState("");
+  const [currentUser, setCurrentUser] = useState("andres");
   const Api_URL = "https://playground.4geeks.com/todo";
 
   function sendData(e) {
@@ -103,6 +105,7 @@ const List = () => {
       .then((data) => {
         console.log(data);
         setTasks(data.todos);
+        setCurrentUser(user);
       })
       .catch((error) => {
         console.log(error);
@@ -135,7 +138,8 @@ const List = () => {
 
   const ChangeUser = () => {
     Tasklist();
-   // setUser("");
+    setPlaceholderValue("");
+    
   };
 
   useEffect(() => {
@@ -144,9 +148,9 @@ const List = () => {
   }, []);
 
   return (
-    <form onSubmit={sendData} className="d-flex justify-content-between">
-      <div className="col-1 me-auto"></div>
-      <ul className="todo-list list-group col-5 list-group-flush ms-auto">
+    <>
+    <form onSubmit={sendData} className="d-flex justify-content-center">
+      <ul className="todo-list list-group col-5 list-group-flush ">
         <li className="list-group-item ps-5">
           <input
             type="text"
@@ -182,15 +186,18 @@ const List = () => {
           {TaskCounter(tasks)}
         </li>
       </ul>
-      <div className="col-2 ms-auto">
-        <div>
+    </form>
+    <div className="col-2 ms-auto  button-stuff">
+        <div className="d-flex flex-column">
+          <label for="username">current user : {currentUser}</label>
           <input
             type="text"
             placeholder="Username"
+            id="username"
             onChange={(e) => {
-              setUser(e.target.value);
+              setUser(e.target.value), setPlaceholderValue(e.target.value);
             }}
-            value={user}
+            value={PlaceholderValue}
           ></input>
           <button
             type="button"
@@ -201,16 +208,16 @@ const List = () => {
           >
             Change User
           </button>
+          <button
+            type="button"
+            className="btn btn-danger mt-2"
+            onClick={DeleteList}
+          >
+            Delete Todo List
+          </button>
         </div>
-        <button
-          type="button"
-          className="btn btn-danger mt-2"
-          onClick={DeleteList}
-        >
-          Delete Todo List
-        </button>
       </div>
-    </form>
+      </>
   );
 };
 export default List;
